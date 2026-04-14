@@ -2,6 +2,7 @@ package main
 
 import (
 	"buscador/internal/fetcher"
+	"buscador/internal/models"
 	"buscador/processor"
 	"fmt"
 
@@ -12,7 +13,10 @@ import (
 func main() {
 	start := time.Now()
 	//var price1, price2, price3 float64
-	priceChannel := make(chan float64) //channel para resumir todos as goroutines em uma variável só
+	//priceChannel := make(chan models.PriceDetail)//make(chan float64) //channel para resumir todos as goroutines em uma variável só
+
+	priceChannel := make(chan models.PriceDetail, 7) //buffer -- len (valores no buffer) cap (tamanho máximo)
+
 	// var wg, showWg sync.WaitGroup      //showWg -> garante a execução do último cálculo (as vezes fecha wg e não mostra)
 	//var showWg sync.WaitGroup
 	// wg.Add(3)
