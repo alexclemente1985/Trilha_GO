@@ -14,10 +14,10 @@ func ExibeTodosAlunos(c *gin.Context) {
 	c.JSON(200, alunos)
 }
 
-func Saudacao(c *gin.Context){
+func Saudacao(c *gin.Context) {
 	nome := c.Params.ByName("nome")
 	c.JSON(200, gin.H{
-		"API diz:":"E aí "+nome+", tudo certin?",
+		"API diz:": "E aí " + nome + ", tudo certin?",
 	})
 }
 
@@ -28,7 +28,7 @@ func CriaNovoAluno(c *gin.Context) {
 			"error": err.Error()})
 		return
 	}
-	if err := models.ValidaDadosDeAluno(&aluno); err != nil{
+	if err := models.ValidaDadosDeAluno(&aluno); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"erro": err.Error()})
 		return
@@ -60,22 +60,24 @@ func DeletaAluno(c *gin.Context) {
 
 func EditaAluno(c *gin.Context) {
 	var aluno models.Aluno
+	var input models.Aluno //estratégia para manutenção do ID original, uma vez que ele pode zerar pq não está sendo passado no where do update
+
 	id := c.Params.ByName("id")
 	database.DB.First(&aluno, id)
 
-	if err := c.ShouldBindJSON(&aluno); err != nil {
+	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error()})
 		return
 	}
 
-	if err := models.ValidaDadosDeAluno(&aluno); err != nil{
+	if err := models.ValidaDadosDeAluno(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"erro": err.Error()})
 		return
 	}
 
-	database.DB.Model(&aluno).UpdateColumns(aluno)
+	database.DB.Model(&aluno).Updates(input) //UpdateColumns(aluno)
 	c.JSON(http.StatusOK, aluno)
 }
 
@@ -91,4 +93,16 @@ func BuscaAlunoPorCPF(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, aluno)
+}
+
+func ExibePaginaIndex(c *gin.Context) {
+	var alunos []models.Aluno
+	database.DB.Find(&alunos)
+
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"alunos": alunos})
+}
+
+func RotaNaoEncontrada(c *gin.Context) {
+	c.HTML(http.StatusNotFound, "404.html", nil)
 }
